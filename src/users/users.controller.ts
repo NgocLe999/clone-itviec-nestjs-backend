@@ -10,17 +10,17 @@ import {
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { Public, ResponseMessage, User } from 'src/decorators/customize';
+import { IUser } from './users.interface';
 
 @Controller('users') // Xuất phát với link /users
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
-  create(
-    @Body()
-    createUserDto: CreateUserDto,
-  ) {
-    return this.usersService.create(createUserDto);
+  @ResponseMessage('Created New User Succesfully')
+  create(@Body() createUserDto: CreateUserDto, @User() user: IUser) {
+    return this.usersService.createUser(createUserDto, user);
   }
 
   @Get()
@@ -34,12 +34,14 @@ export class UsersController {
   }
 
   @Patch()
-  update(@Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(updateUserDto);
+  @ResponseMessage('Update User Succesfully')
+  update(@Body() updateUserDto: UpdateUserDto, @User() user: IUser) {
+    return this.usersService.updateUser(updateUserDto, user);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.usersService.remove(id);
+  @ResponseMessage('Delete User Succesfully')
+  remove(@Param('id') id: string, @User() user: IUser) {
+    return this.usersService.deleteUser(id, user);
   }
 }
