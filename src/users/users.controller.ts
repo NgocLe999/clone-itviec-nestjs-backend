@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -19,16 +20,27 @@ export class UsersController {
 
   @Post()
   @ResponseMessage('Created New User Succesfully')
-  create(@Body() createUserDto: CreateUserDto, @User() user: IUser) {
-    return this.usersService.createUser(createUserDto, user);
+  async create(@Body() createUserDto: CreateUserDto, @User() user: IUser) {
+    let newUser = await this.usersService.createUser(createUserDto, user);
+    return {
+      _id: newUser._id,
+      createdAt: newUser?.createdAt,
+    };
   }
 
   @Get()
-  findAll() {
-    return this.usersService.findAll();
+  @ResponseMessage('Fetch All User Succesfully')
+  findAll(
+    @Query('page') currentPage: string,
+    @Query('limit') limit: string,
+    @Query() queryString: string,
+  ) {
+    return this.usersService.findAll(+currentPage, +limit, queryString);
   }
 
+  @Public()
   @Get(':id')
+  @ResponseMessage('Fetch User By Id Succesfully')
   findOne(@Param('id') id: string) {
     return this.usersService.findOne(id);
   }

@@ -33,7 +33,10 @@ export class Users {
   role: string;
 
   @Prop()
-  refreshToken: string;
+  refresh_token: string;
+
+  @Prop()
+  createdAt: Date;
 
   @Prop()
   deletedAt: Date;
@@ -44,19 +47,19 @@ export class Users {
   @Prop({ type: Object })
   createdBy: {
     _id: mongoose.Schema.Types.ObjectId;
-    name: string;
+    email: string;
   };
 
   @Prop({ type: Object })
   deletedBy: {
     _id: mongoose.Schema.Types.ObjectId;
-    name: string;
+    email: string;
   };
 
   @Prop({ type: Object })
   updatedBy: {
     _id: mongoose.Schema.Types.ObjectId;
-    name: string;
+    email: string;
   };
 }
 
