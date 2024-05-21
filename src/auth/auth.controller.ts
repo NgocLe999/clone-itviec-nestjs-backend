@@ -42,8 +42,8 @@ export class AuthController {
   handleGetUser(@User() user: IUser) {
     return { user };
   }
-  // Trường hợp access_token hết hạn.
 
+  // Trường hợp access_token hết hạn.
   @Public()
   @ResponseMessage('Fresh User Succesfully')
   @Get('refresh')
@@ -51,6 +51,7 @@ export class AuthController {
     @Req() request: Request,
     @Res({ passthrough: true }) response: Response,
   ) {
-    return this.authService.processToken(request, response);
+    const refresh_token = request.cookies['refresh_token'];
+    return this.authService.processToken(response, refresh_token);
   }
 }

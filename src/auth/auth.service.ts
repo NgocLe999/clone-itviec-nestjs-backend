@@ -63,7 +63,7 @@ export class AuthService {
       user: { _id, name, email, role },
     };
   }
-  
+
   async registerUser(registerUserDto: RegisterUserDto) {
     let newUser = await this.usersService.registerUser(registerUserDto);
     return {
@@ -74,19 +74,24 @@ export class AuthService {
 
   createResfreshToken = (payload: any) => {
     const refresh_token = this.jwtService.sign(payload, {
-      secret: this.configService.get<string>('JWT_REFRESH_TOKEN_SCRET'),
+      secret: this.configService.get<string>('JWT_REFRESH_TOKEN_SECRET'),
       expiresIn:
         ms(this.configService.get<string>('JWT_REFRESH_TOKEN_EXPIRE')) / 1000,
     });
     return refresh_token;
   };
 
-  processToken = async (request: Request, response: Response) => {
+  processToken =  async (
+    response: Response,
+    refresh_token: string,
+  ) => {
     try {
+      // check refresh_token
+      this.jwtService.verify(refresh_token, {
+        secret: this.configService.get<string>('JWT_REFRESH_TOKEN_SECRET'),
+      });
       // Query user by refresh_token to databasse
-      let user = await this.usersService.queryUserByRefreshToken(
-        request.cookies['refresh_token'],
-      );
+      let user = await this.usersService.queryUserByRefreshToken(refresh_token);
       if (user) {
         // Logic trả về access token và refresh token mới
         const { _id, name, email, role } = user;
@@ -118,6 +123,10 @@ export class AuthService {
           access_token: this.jwtService.sign(payload),
           user: { _id, name, email, role },
         };
+      } else {
+        throw new BadRequestException(
+          'RefreshToken đã hết hạn. Vui lòng login.',
+        );
       }
     } catch (error) {
       // Trường hợp truyền sai refreshToken hoặc refreshToken hết hạn
