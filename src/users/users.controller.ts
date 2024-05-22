@@ -31,11 +31,11 @@ export class UsersController {
   @Get()
   @ResponseMessage('Fetch All User Succesfully')
   findAll(
-    @Query('page') currentPage: string,
-    @Query('limit') limit: string,
+    @Query('current') currentPage: number,
+    @Query('pageSize') limit: number,
     @Query() queryString: string,
   ) {
-    return this.usersService.findAll(+currentPage, +limit, queryString);
+    return this.usersService.findAll(currentPage, limit, queryString);
   }
 
   @Public()

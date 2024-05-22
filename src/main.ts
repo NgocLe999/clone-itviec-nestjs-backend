@@ -25,10 +25,11 @@ async function bootstrap() {
   app.use(cookieParser());
   //config cors
   app.enableCors({
-    origin: '*',
+    origin: true, // frontend cùng domain kết nối tới 
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     preflightContinue: false,
     optionsSuccessStatus: 204,
+    credentials: true,
   });
 
   await app.listen(port);

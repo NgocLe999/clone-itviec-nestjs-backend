@@ -28,11 +28,11 @@ export class CompaniesController {
   @Get()
   @ResponseMessage('Fetch list company paginate succesfully') // custom decorators
   findAll(
-    @Query('page') currentPage: string,
-    @Query('limit') limit: string,
+    @Query('current') currentPage: number,
+    @Query('pageSize') pageSize: number,
     @Query() queryString: string,
   ) {
-    return this.companiesService.findAll(+currentPage, +limit, queryString);
+    return this.companiesService.findAll(currentPage, pageSize, queryString);
   }
 
   @Get(':id')

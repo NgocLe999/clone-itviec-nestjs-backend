@@ -46,7 +46,8 @@ export class UsersService {
 
   async findAll(currentPage: number, limit: number, queryString: string) {
     const { filter, population } = aqp(queryString);
-    delete filter.page;
+    delete filter.current;
+    delete filter.pageSize;
 
     let { sort } = aqp(queryString);
     let offset = (+currentPage - 1) * +limit;
@@ -143,11 +144,11 @@ export class UsersService {
     return registerUser;
   }
 
-  addRefreshToken = async (id: string, refresh_token: string) => {
-    return await this.UsersModel.updateOne({ _id: id },{ refresh_token});
+  updateRefreshToken = async (id: string, refresh_token: string) => {
+    return await this.UsersModel.updateOne({ _id: id }, { refresh_token });
   };
 
-  queryUserByRefreshToken = async (refresh_token:string)=>{
-    return await this.UsersModel.findOne({refresh_token})
-  }
+  queryUserByRefreshToken = async (refresh_token: string) => {
+    return await this.UsersModel.findOne({ refresh_token });
+  };
 }

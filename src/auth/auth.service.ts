@@ -47,7 +47,7 @@ export class AuthService {
     const refresh_token = this.createResfreshToken(payload);
 
     // update user with refresh_token/// When user logout --> delete refresh token.
-    await this.usersService.addRefreshToken(_id, refresh_token);
+    await this.usersService.updateRefreshToken(_id, refresh_token);
 
     // Clear cookies
     response.clearCookie('refresh_token');
@@ -81,10 +81,7 @@ export class AuthService {
     return refresh_token;
   };
 
-  processToken =  async (
-    response: Response,
-    refresh_token: string,
-  ) => {
+  processToken = async (response: Response, refresh_token: string) => {
     try {
       // check refresh_token
       this.jwtService.verify(refresh_token, {
@@ -106,7 +103,10 @@ export class AuthService {
         const refresh_token = this.createResfreshToken(payload);
 
         // update user with refresh_token/// When user logout --> delete refresh token.
-        await this.usersService.addRefreshToken(_id.toString(), refresh_token);
+        await this.usersService.updateRefreshToken(
+          _id.toString(),
+          refresh_token,
+        );
 
         // Clear cookies
         response.clearCookie('refresh_token');
@@ -132,5 +132,11 @@ export class AuthService {
       // Trường hợp truyền sai refreshToken hoặc refreshToken hết hạn
       throw new BadRequestException('RefreshToken đã hết hạn. Vui lòng login.');
     }
+  };
+
+  logout = async (user: IUser, response: Response) => {
+    await this.usersService.updateRefreshToken(user._id, null);
+    response.clearCookie('refresh_token');
+    return 'OK';
   };
 }
