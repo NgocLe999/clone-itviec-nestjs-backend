@@ -30,12 +30,6 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
   // input từ jwt.strategy // không @Public() sẽ vào hàm handleRequest
   handleRequest(err: any, user: any, info: any, context: ExecutionContext) {
     const request: Request = context.switchToHttp().getRequest();
-
-    console.log('check request', request);
-
-    // const route: Request = req.route;
-    // console.log('check route', route);
-
     // You can throw an exception based on either "info" or "err" arguments
     if (err || !user) {
       throw (
@@ -47,15 +41,21 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       );
     }
     const currentMethod = request?.method;
-    const currentPath = request?.route?.path;
+    const currentPath = request?.route?.path as string;
     const permissions = user?.permissions ?? [];
-    const isExist = permissions.find(
+    let isExist = permissions.find(
       (permission) =>
         currentMethod === permission.method &&
         currentPath === permission.apiPath,
     );
-    if(!isExist){
-      throw new ForbiddenException('Bạn không có quyền để truy cập endpoint này') /// Mã lỗi 403
+
+    // không phân quyền route này trong permissions user -- > public để chạy tiếp
+    if (currentPath.startsWith('/api/v1/auth/')) isExist = true;
+
+    if (!isExist) {
+      throw new ForbiddenException(
+        'Bạn không có quyền để truy cập endpoint này',
+      ); /// Mã lỗi 403
     }
 
     return user;
