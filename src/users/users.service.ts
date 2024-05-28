@@ -10,10 +10,13 @@ import { User } from 'src/decorators/customize';
 import { IUser } from './users.interface';
 
 import aqp from 'api-query-params';
+import { Role, RoleDocument } from 'src/roles/schemas/role.schema';
+import { USER_ROLE } from 'src/databases/sample';
 @Injectable()
 export class UsersService {
   constructor(
     @InjectModel(Users.name) private UsersModel: SoftDeleteModel<UsersDocument>,
+    @InjectModel(Role.name) private RoleModel: SoftDeleteModel<RoleDocument>,
   ) {}
 
   hassPassword = (password: string) => {
@@ -78,14 +81,19 @@ export class UsersService {
   async findOne(id: string) {
     //check id typeof objectId
     if (!mongoose.Types.ObjectId.isValid(id)) return 'not found user';
-    const user = await this.UsersModel.findOne({ _id: id }).select('-password');
+    const user = (
+      await this.UsersModel.findOne({ _id: id }).select('-password')
+    ).populate({ path: 'role', select: { _id: 1, name: 1 } });
     return user;
     // const userDataClone = user.toObject();
     // delete userDataClone.password;
   }
 
   async findOneByUsername(username: string) {
-    const user = await this.UsersModel.findOne({ email: username });
+    const user = (await this.UsersModel.findOne({ email: username })).populate({
+      path: 'role',
+      select: { name: 1 },
+    });
     return user;
   }
 
@@ -109,6 +117,12 @@ export class UsersService {
   }
 
   async deleteUser(id: string, user: IUser) {
+    if (!mongoose.Types.ObjectId.isValid(id)) return 'not found user';
+
+    const foundUser = await this.UsersModel.findById(id);
+    if (foundUser && foundUser.email === 'admin@gmail.com') {
+      throw new BadRequestException('Không thể xóa tài khoản admin@gmail.com');
+    }
     await this.UsersModel.updateOne(
       { _id: id },
       {
@@ -131,6 +145,9 @@ export class UsersService {
         'Email đã tồn tại. Vui lòng nhập email khác.',
       );
     }
+    // fetch user role
+    const userRole = await this.RoleModel.findOne({ name: USER_ROLE });
+
     const hashPassword = this.hassPassword(password);
     const registerUser = await this.UsersModel.create({
       name,
@@ -139,7 +156,7 @@ export class UsersService {
       age,
       gender,
       address,
-      role: 'USER',
+      role: userRole?._id,
     });
     return registerUser;
   }
@@ -149,6 +166,11 @@ export class UsersService {
   };
 
   queryUserByRefreshToken = async (refresh_token: string) => {
-    return await this.UsersModel.findOne({ refresh_token });
+    return (await this.UsersModel.findOne({ refresh_token })).populate({
+      path: 'role',
+      select: {
+        name: 1,
+      },
+    });
   };
 }

@@ -23,7 +23,7 @@ intercept(context: ExecutionContext, next: CallHandler):
 Observable<Response<T>> {
    return next.handle().pipe(
    map((data) => ({
-    message: this.reflector.get<string>(RESPONSE_MESSAGE,context.getHandler()) || data.message || '',
+    message: this.reflector.get<string>(RESPONSE_MESSAGE,context.getHandler()) || data?.message || '',
     statusCode: context.switchToHttp().getResponse().statusCode,
     data: data,
 //meta: {}, // if this is supposed to be the actual return then replace {} with data.result

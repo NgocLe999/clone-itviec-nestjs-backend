@@ -1,5 +1,6 @@
 import {
   IsEmail,
+  IsMongoId,
   IsNotEmpty,
   IsNotEmptyObject,
   IsObject,
@@ -17,7 +18,11 @@ export class Company {
   @IsString()
   @IsNotEmpty()
   name: string;
+
+  @IsNotEmpty()
+  logo: string;
 }
+
 export class CreateUserDto {
   @IsNotEmpty({ message: 'Name này không được để trống' })
   name: string;
@@ -35,11 +40,12 @@ export class CreateUserDto {
   @IsNotEmpty({ message: 'gender này không được để trống' })
   gender: string;
 
-  @IsNotEmpty({ message: 'gender này không được để trống' })
+  @IsNotEmpty({ message: 'address này không được để trống' })
   address: string;
 
-  @IsNotEmpty({ message: 'gender này không được để trống' })
-  role: string;
+  @IsNotEmpty({ message: 'role này không được để trống' })
+  @IsMongoId({ message: 'role có định dạng là mongoId' })
+  role: mongoose.Schema.Types.ObjectId;;
 
   @IsNotEmptyObject()
   @IsObject()

@@ -14,6 +14,8 @@ export class JobsService {
   ) {}
 
   async create(createJobDto: CreateJobDto, user: IUser) {
+
+
     let newJob = await this.JobsModel.create({
       ...createJobDto,
       createdBy: {
@@ -63,7 +65,7 @@ export class JobsService {
       return 'Job này không tồn tại trên hệ thống';
     }
     return resultJob;
-    // return `This action returns a #${id} job`;/
+
   }
 
   async update(id: string, updateJobDto: UpdateJobDto, user: IUser) {

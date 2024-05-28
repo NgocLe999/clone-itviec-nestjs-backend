@@ -9,6 +9,8 @@ import { IUser } from 'src/users/users.interface';
 import { UsersService } from 'src/users/users.service';
 import ms from 'ms';
 import { Response, Request, response } from 'express';
+import { RolesService } from 'src/roles/roles.service';
+import mongoose from 'mongoose';
 
 @Injectable()
 export class AuthService {
@@ -17,6 +19,7 @@ export class AuthService {
     private usersService: UsersService,
     private jwtService: JwtService,
     private configService: ConfigService,
+    private roleService: RolesService,
   ) {}
 
   // username và pass là 2 tham số thư viện passport ném về
@@ -28,14 +31,22 @@ export class AuthService {
         user.password,
       );
       if (isValidPassword === true) {
-        return user;
+        // fetch user role
+        const userRole = user.role as unknown as { _id: string; name: string };
+        const temp = (await this.roleService.findOne(userRole._id));
+        const objUser = {
+          ...user.toObject(),
+          permissions: temp?.permissions ?? [],
+        };
+        return objUser;
       }
     }
     return null;
   }
 
   async login(user: IUser, response: Response) {
-    const { _id, name, email, role } = user;
+    const { _id, name, email, role, permissions } = user;
+    // payload tạo ra jwt --> đưa cho hàm validate ở jwt strategy giải mã.
     const payload = {
       sub: 'token login',
       iss: 'from server',
@@ -44,6 +55,7 @@ export class AuthService {
       email,
       role,
     };
+
     const refresh_token = this.createResfreshToken(payload);
 
     // update user with refresh_token/// When user logout --> delete refresh token.
@@ -60,7 +72,7 @@ export class AuthService {
 
     return {
       access_token: this.jwtService.sign(payload),
-      user: { _id, name, email, role },
+      user: { _id, name, email, role, permissions },
     };
   }
 
@@ -87,6 +99,7 @@ export class AuthService {
       this.jwtService.verify(refresh_token, {
         secret: this.configService.get<string>('JWT_REFRESH_TOKEN_SECRET'),
       });
+
       // Query user by refresh_token to databasse
       let user = await this.usersService.queryUserByRefreshToken(refresh_token);
       if (user) {
@@ -108,6 +121,10 @@ export class AuthService {
           refresh_token,
         );
 
+        // fetch user role
+        const userRole = user.role as unknown as { _id: string; name: string };
+        const temp = await this.roleService.findOne(userRole._id);
+
         // Clear cookies
         response.clearCookie('refresh_token');
 
@@ -121,7 +138,13 @@ export class AuthService {
 
         return {
           access_token: this.jwtService.sign(payload),
-          user: { _id, name, email, role },
+          user: {
+            _id,
+            name,
+            email,
+            role,
+            permissions: temp?.permissions ?? [],
+          },
         };
       } else {
         throw new BadRequestException(
@@ -134,6 +157,7 @@ export class AuthService {
     }
   };
 
+  // Logout: update refresh_token = null. clear cookies
   logout = async (user: IUser, response: Response) => {
     await this.usersService.updateRefreshToken(user._id, null);
     response.clearCookie('refresh_token');

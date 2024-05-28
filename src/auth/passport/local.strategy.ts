@@ -14,6 +14,6 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     if (!user) {
       throw new UnauthorizedException('Invalid Username/Password!');
     }
-    return user; // user lấy từ hàm validateUser chọc từ database
+    return user; // user lấy từ hàm validateUser chọc từ database ---> gán vào req.user
   }
 }

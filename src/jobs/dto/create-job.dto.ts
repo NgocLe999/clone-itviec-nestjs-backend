@@ -33,4 +33,9 @@ export class CreateJobDto {
 
   @IsNotEmpty({ message: 'Description không được để trống' })
   description: string;
+
+  @IsNotEmpty({ message: 'Location không được để trống' })
+  location: string;
+
+  
 }
