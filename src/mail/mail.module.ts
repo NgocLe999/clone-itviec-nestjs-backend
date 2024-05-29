@@ -42,6 +42,7 @@ import { Jobs, JobsModel } from 'src/jobs/schemas/job.schema';
       { name: Subscriber.name, schema: SubscriberModel },
       { name: Jobs.name, schema: JobsModel },
     ]),
+   
   ],
   controllers: [MailController],
   providers: [MailService],

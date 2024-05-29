@@ -7,7 +7,7 @@ import {
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
-import { IS_PUBLIC_KEY } from 'src/decorators/customize';
+import { IS_PUBLIC_KEY, IS_PUBLIC_PERMISSION } from 'src/decorators/customize';
 import { IUser } from 'src/users/users.interface';
 import { Context } from 'vm';
 
@@ -51,8 +51,13 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 
     // không phân quyền route này trong permissions user -- > public để chạy tiếp
     if (currentPath.startsWith('/api/v1/auth/')) isExist = true;
+    
+    const isPublicPermission = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_PERMISSION, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
 
-    if (!isExist) {
+    if (!isExist && !isPublicPermission) {
       throw new ForbiddenException(
         'Bạn không có quyền để truy cập endpoint này',
       ); /// Mã lỗi 403

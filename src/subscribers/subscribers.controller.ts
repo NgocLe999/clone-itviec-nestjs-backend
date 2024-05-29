@@ -11,7 +11,11 @@ import {
 import { SubscribersService } from './subscribers.service';
 import { CreateSubscriberDto } from './dto/create-subscriber.dto';
 import { UpdateSubscriberDto } from './dto/update-subscriber.dto';
-import { ResponseMessage, User } from 'src/decorators/customize';
+import {
+  PublicPermission,
+  ResponseMessage,
+  User,
+} from 'src/decorators/customize';
 import { IUser } from 'src/users/users.interface';
 
 @Controller('subscribers')
@@ -37,19 +41,21 @@ export class SubscribersController {
     return this.subscribersService.findAll(currentPage, pageSize, queryString);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.subscribersService.findOne(id);
+  @PublicPermission()
+  @Post('skills')
+  findOne(
+    @User() user: IUser,
+  ) {
+    return this.subscribersService.findOne(user);
   }
 
   @ResponseMessage('Update Subscriber Successfully')
-  @Patch(':id')
+  @Patch()
   update(
-    @Param('id') id: string,
     @Body() updateSubscriberDto: UpdateSubscriberDto,
     @User() user: IUser,
   ) {
-    return this.subscribersService.update(id, updateSubscriberDto, user);
+    return this.subscribersService.update(updateSubscriberDto, user);
   }
 
   @ResponseMessage('Delete Subscriber Succesfully')

@@ -65,22 +65,18 @@ export class SubscribersService {
     };
   }
 
-  async findOne(id: string) {
-    //check id typeof objectId
-    if (!mongoose.Types.ObjectId.isValid(id)) return 'not found user';
-    const subscriber = await this.SubscriberModel.findOne({ _id: id });
+  async findOne(user: IUser) {
+    const subscriber = await this.SubscriberModel.findOne({
+      email: user.email,
+    });
     return subscriber;
     // const userDataClone = user.toObject();
     // delete userDataClone.password;
   }
 
-  async update(
-    id: string,
-    updateSubscriberDto: UpdateSubscriberDto,
-    user: IUser,
-  ) {
+  async update(updateSubscriberDto: UpdateSubscriberDto, user: IUser) {
     return await this.SubscriberModel.updateOne(
-      { _id: id },
+      { email: user.email },
       {
         ...updateSubscriberDto,
         updatedBy: {
@@ -88,6 +84,7 @@ export class SubscribersService {
           name: user.name,
         },
       },
+      { upsert: true }, // nếu bản ghi đã tồn tại thì update, chưa tồn tại thì insert hay tạo mới.
     );
   }
 

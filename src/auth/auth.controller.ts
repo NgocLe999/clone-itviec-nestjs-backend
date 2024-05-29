@@ -14,6 +14,7 @@ import { RegisterUserDto } from 'src/users/dto/create-user.dto';
 import { Request, Response } from 'express';
 import { IUser } from 'src/users/users.interface';
 import { RolesService } from 'src/roles/roles.service';
+import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 
 @Controller('auth')
 export class AuthController {
@@ -23,8 +24,10 @@ export class AuthController {
   ) {}
 
   @Public() // không check JWT
-  @UseGuards(LocalAuthGuard)
   @ResponseMessage('Login Succesfully')
+  @UseGuards(LocalAuthGuard)
+  @UseGuards(ThrottlerGuard)
+  // @Throttle({ default: { limit: 3, ttl: 60000 } })//  Override default configuration for Rate limiting and duration
   @Post('login') // route --> auth/login
   async handleLogin(
     @Req() req,
@@ -44,8 +47,8 @@ export class AuthController {
   @ResponseMessage('Get User Succesfully')
   @Get('account')
   async handleGetUser(@User() user: IUser) {
-    const temp = await this.rolesService.findOne(user.role._id) as any
-    user.permissions = temp.permissions 
+    const temp = (await this.rolesService.findOne(user.role._id)) as any;
+    user.permissions = temp.permissions;
     return { user };
   }
 

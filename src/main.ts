@@ -7,13 +7,15 @@ import { TransformationInterceptor } from './core/transform.interceptor';
 import cookieParser from 'cookie-parser';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
+import helmet from 'helmet';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const reflector = app.get(Reflector);
   app.useGlobalGuards(new JwtAuthGuard(reflector));
   const configService = app.get(ConfigService);
   const port = configService.get('PORT');
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
   app.useGlobalInterceptors(new TransformationInterceptor(reflector));
   app.useStaticAssets(join(__dirname, '..', 'public'));
   app.setGlobalPrefix('api');
@@ -32,6 +34,17 @@ async function bootstrap() {
     optionsSuccessStatus: 204,
     credentials: true,
   });
+  //config helmet
+  app.use(helmet());
+  // config swagger
+  const config = new DocumentBuilder()
+    .setTitle('Nest JS Backend')
+    .setDescription('The API description')
+    .setVersion('1.0')
+    // .addTag('Lê Xuân Ngọc')
+    .build();
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api', app, document);
 
   await app.listen(port);
 }
