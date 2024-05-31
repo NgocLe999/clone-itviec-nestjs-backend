@@ -9,6 +9,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import mongoose from 'mongoose';
+import { ApiProperty } from '@nestjs/swagger';
 
 // validate nested object
 export class Company {
@@ -45,7 +46,7 @@ export class CreateUserDto {
 
   @IsNotEmpty({ message: 'role này không được để trống' })
   @IsMongoId({ message: 'role có định dạng là mongoId' })
-  role: mongoose.Schema.Types.ObjectId;;
+  role: mongoose.Schema.Types.ObjectId;
 
   @IsNotEmptyObject()
   @IsObject()
@@ -76,4 +77,18 @@ export class RegisterUserDto {
 
   @IsNotEmpty({ message: 'Role này không được để trống' })
   role: string;
+}
+
+export class UserLoginDto {
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({ example: 'admin@gmail.com' })
+  readonly username: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({
+    example: '123456',
+  })
+  readonly password: string;
 }

@@ -15,12 +15,11 @@ export class CreateResumeDto {
   status: string;
 
   @IsNotEmpty({ message: 'company không được để trống' })
-  company: mongoose.Schema.Types.ObjectId;
+  companyId: mongoose.Schema.Types.ObjectId;
 
   @IsNotEmpty({ message: 'job không được để trống' })
-  job: mongoose.Schema.Types.ObjectId;
+  jobId: mongoose.Schema.Types.ObjectId;
 }
-
 
 export class CreateResumeCvDto {
   @IsNotEmpty({ message: 'Url không được để trống' })
@@ -28,9 +27,9 @@ export class CreateResumeCvDto {
 
   @IsMongoId({ message: 'company is mongoId' })
   @IsNotEmpty({ message: 'company không được để trống' })
-  company: mongoose.Schema.Types.ObjectId;
+  companyId: mongoose.Schema.Types.ObjectId;
 
   @IsMongoId({ message: 'job is mongoId' })
   @IsNotEmpty({ message: 'job không được để trống' })
-  job: mongoose.Schema.Types.ObjectId;
+  jobId: mongoose.Schema.Types.ObjectId;
 }

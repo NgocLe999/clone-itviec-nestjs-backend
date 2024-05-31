@@ -10,12 +10,14 @@ import {
 import { AuthService } from './auth.service';
 import { Public, ResponseMessage, User } from 'src/decorators/customize';
 import { LocalAuthGuard } from './local-auth.guard';
-import { RegisterUserDto } from 'src/users/dto/create-user.dto';
+import { RegisterUserDto, UserLoginDto } from 'src/users/dto/create-user.dto';
 import { Request, Response } from 'express';
 import { IUser } from 'src/users/users.interface';
 import { RolesService } from 'src/roles/roles.service';
 import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
+import { ApiBody, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -27,6 +29,7 @@ export class AuthController {
   @ResponseMessage('Login Succesfully')
   @UseGuards(LocalAuthGuard)
   @UseGuards(ThrottlerGuard)
+  @ApiBody({ type: UserLoginDto })
   // @Throttle({ default: { limit: 3, ttl: 60000 } })//  Override default configuration for Rate limiting and duration
   @Post('login') // route --> auth/login
   async handleLogin(
